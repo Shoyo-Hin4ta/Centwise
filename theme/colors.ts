@@ -1,0 +1,27 @@
+export const colors = {
+  anime: {
+    purple: "#b388ff",
+    pink: "#ff93c1",
+    blue: "#93c1ff",
+    mint: "#93ffd8",
+    lavender: "#d8b3ff",
+    background: "#f3e5ff",
+    darkPurple: "#6a1b9a",
+    darkBackground: "#2d1b3e",
+  },
+  gray: {
+    50: "#f9fafb",
+    100: "#f3f4f6",
+    200: "#e5e7eb",
+    300: "#d1d5db",
+    400: "#9ca3af",
+    500: "#6b7280",
+    600: "#4b5563",
+    700: "#374151",
+    800: "#1f2937",
+    900: "#111827",
+  },
+  white: "#ffffff",
+  black: "#000000",
+  appBackground: "#f8f9fa",
+};
