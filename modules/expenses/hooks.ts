@@ -1,14 +1,23 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react"; // Keep only one import line
 
 import { useExpensesStore } from "./store";
-import { TimeFrame } from "./types";
+import { TimeFrame, Transaction } from "./types"; // Added Transaction type
 
-export const useExpenseCategories = (timeFrame: TimeFrame = "month") => {
+// Updated hook to accept optional startDate and endDate
+export const useExpenseCategories = (
+  timeFrame: TimeFrame = "month", 
+  startDate?: Date | null, 
+  endDate?: Date | null
+) => {
   const getExpenseSummary = useExpensesStore((state) => state.getExpenseSummary);
   const isLoading = useExpensesStore((state) => state.isLoading);
   const error = useExpensesStore((state) => state.error);
 
-  const summary = getExpenseSummary(timeFrame);
+  // Use useMemo to recalculate summary only when dependencies change
+  const summary = useMemo(() => {
+    // Pass dates to the store function if they exist
+    return getExpenseSummary(timeFrame, startDate, endDate); 
+  }, [timeFrame, startDate, endDate, getExpenseSummary]);
 
   return {
     categories: summary.categories,
@@ -19,14 +28,24 @@ export const useExpenseCategories = (timeFrame: TimeFrame = "month") => {
 };
 
 export const useAddExpense = () => {
-  const addExpense = useExpensesStore((state) => state.addExpense);
+  const addExpenseAction = useExpensesStore((state) => state.addExpense);
 
+  // Update hook to accept a single object argument matching the store action
   const addNewExpense = useCallback(
-    (amount: number, categoryId: string, date: Date = new Date()) => {
-      return addExpense(amount, categoryId, date);
+    (newExpenseData: Omit<Transaction, 'id'>) => {
+      // Create the base object without the date initially
+      const expenseBase = { ...newExpenseData };
+      
+      // Add the date property, using the provided date or defaulting to now
+      const expenseToAdd = {
+        ...expenseBase,
+        date: newExpenseData.date instanceof Date ? newExpenseData.date : new Date(),
+      };
+
+      return addExpenseAction(expenseToAdd);
     },
-    [addExpense]
+    [addExpenseAction]
   );
 
-  return { addExpense: addNewExpense };
+  return { addExpense: addNewExpense }; // Keep the exported name consistent
 };
