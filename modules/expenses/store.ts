@@ -57,6 +57,7 @@ interface ExpenseState {
 
   // Actions
   addExpense: (newExpense: Omit<Transaction, 'id'>) => void; // Simplified addExpense
+  updateTransaction: (updatedTransaction: Transaction) => void; // Add update function
   getExpenseSummary: (timeFrame: TimeFrame, customStartDate?: Date | null, customEndDate?: Date | null) => ExpenseSummary; 
 
   // Selectors (added for convenience)
@@ -93,6 +94,15 @@ export const useExpensesStore = create<ExpenseState>((set, get) => ({
 
   getCategoryById: (id) => {
     return get().categories.find(cat => cat.id === id);
+  },
+  
+  updateTransaction: (updatedTransaction) => {
+    set((state) => ({
+      transactions: state.transactions.map(transaction => 
+        transaction.id === updatedTransaction.id ? updatedTransaction : transaction
+      )
+    }));
+    console.log("Updated transaction:", updatedTransaction);
   },
 
   // Rewritten implementation to calculate summaries dynamically

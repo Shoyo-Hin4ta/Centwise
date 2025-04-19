@@ -10,6 +10,7 @@ import { ArrowLeft, Calendar as CalendarIcon, Filter, PieChart as PieChartIcon }
 import { Header } from "../../components/Header";
 import { BottomNav } from "../../components/BottomNav";
 import { Button } from "../../components/ui/Button";
+import { ChangeCategoryModal } from "../../components/ChangeCategoryModal";
 
 // Theme
 import { colors } from "../../theme/colors";
@@ -49,11 +50,16 @@ export default function Dashboard() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [customRangeActive, setCustomRangeActive] = useState(false);
+  
+  // Category Modal State
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // --- Store Selectors ---
   const getAllTransactions = useExpensesStore((state) => state.getAllTransactions);
   const getCategoryById = useExpensesStore((state) => state.getCategoryById);
   const storeCategories = useExpensesStore((state) => state.categories); // Get base category definitions
+  const updateTransaction = useExpensesStore((state) => state.updateTransaction);
 
   // --- Data Fetching Hook ---
   // Pass startDate and endDate if customRangeActive is true
@@ -604,9 +610,19 @@ export default function Dashboard() {
                         <Text className="text-xs text-gray-500">{transaction.paymentMethod}</Text>
                       </View>
                     </View>
-                    <Text className="font-bold text-base text-gray-800">
-                      -${transaction.amount.toFixed(2)}
-                    </Text>
+                    <View className="items-end">
+                      <Text className="font-bold text-base text-gray-800">
+                        -${transaction.amount.toFixed(2)}
+                      </Text>
+                      <TouchableOpacity 
+                        onPress={() => {
+                          setSelectedTransaction(transaction);
+                          setShowCategoryModal(true);
+                        }}
+                      >
+                        <Text className="text-xs text-anime-purple">Change Category</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 );
               })
@@ -679,6 +695,37 @@ export default function Dashboard() {
           </View>
         )}
       </View>
+      {/* Category Change Modal */}
+      {selectedTransaction && (
+        <ChangeCategoryModal
+          visible={showCategoryModal}
+          categories={storeCategories}
+          currentCategoryId={selectedTransaction.categoryId}
+          onSelect={(categoryId) => {
+            if (selectedTransaction) {
+              // Update the transaction with the new category
+              updateTransaction({
+                ...selectedTransaction,
+                categoryId
+              });
+              
+              // Update the filtered transactions list if needed
+              if (filteredTransactions.length > 0) {
+                setFilteredTransactions(
+                  filteredTransactions.map(t => 
+                    t.id === selectedTransaction.id 
+                      ? { ...t, categoryId } 
+                      : t
+                  )
+                );
+              }
+            }
+            setShowCategoryModal(false);
+          }}
+          onClose={() => setShowCategoryModal(false)}
+        />
+      )}
+      
       <BottomNav />
     </View>
   );

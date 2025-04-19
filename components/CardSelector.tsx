@@ -5,6 +5,7 @@ import { Plus } from "lucide-react-native";
 
 import { CardChip, Card } from "./CardChip";
 import { colors } from "../theme/colors";
+import { AddCardModal } from "./AddCardModal";
 
 // Default cards
 const defaultCards: Card[] = [
@@ -45,8 +46,9 @@ export function CardSelector({ onCardSelect }: CardSelectorProps) {
   // Find the default card (Cash)
   const defaultCard = defaultCards.find((card) => card.isDefault) || defaultCards[0];
 
-  const [cards] = useState<Card[]>(defaultCards);
+  const [cards, setCards] = useState<Card[]>(defaultCards);
   const [selectedCard, setSelectedCard] = useState<Card>(defaultCard);
+  const [showAddCardModal, setShowAddCardModal] = useState(false);
 
   const handleCardSelect = (card: Card) => {
     setSelectedCard(card);
@@ -69,10 +71,25 @@ export function CardSelector({ onCardSelect }: CardSelectorProps) {
           />
         ))}
 
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => setShowAddCardModal(true)}
+        >
           <Plus size={14} color={colors.anime.purple} />
         </TouchableOpacity>
       </ScrollView>
+      
+      <AddCardModal
+        visible={showAddCardModal}
+        onAddCard={(newCard) => {
+          // In a real app, you would add the card to the store
+          console.log("New card:", newCard);
+          // For demo purposes, add it to the local state
+          setCards([...cards, newCard]);
+          setShowAddCardModal(false);
+        }}
+        onClose={() => setShowAddCardModal(false)}
+      />
     </View>
   );
 }
